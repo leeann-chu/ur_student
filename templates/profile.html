@@ -1,0 +1,71 @@
+{% include "base.html" %}
+{% block content %}
+  <script>
+    $(function() {
+      $('.print').hover(function() {
+        $('#editText').show();
+        $('.fa-user').replaceWith("<i class=\"fas fa-user-edit\"></i>");
+      }, function() {
+        $('#editText').hide();
+        $('.fa-user-edit').replaceWith("<i class=\"fas fa-user\"></i>");
+      });
+
+      $('.alert').delay(1000).fadeOut();
+    });
+  </script>
+    <body>
+      {% if request.args.get('edit') %}
+        <div class="alert alert-success"> <i class="fas fa-check"></i> Profile Updated Successfully! </div>
+      {% endif %}
+      <div class="pfp">
+        <img src={{ pfp }} alt="Your profile picture goes here" />
+      </div>
+
+      <div class="container custom-container">
+        <div class="row align-items-center" style="height: 50px">
+          <div class="col-1 print" style="width: 30px; font-size: 25px">
+            <a class="edit" style="color: purple" href="{{ url_for('edit', uid=current_user.id, newUser=False) }}">
+              <span class="edit"><i class="fas fa-user"></i></span>
+            </a>
+          </div>
+          <div class="col-7 print" style="cursor: pointer">
+            <a class="edit" style="color: purple; font-size: 25px" href="{{ url_for('edit', uid=current_user.id, newUser=False) }}">
+              {{ name }} <span id=editText style="color: blueviolet"> (Edit Profile) </span>
+            </a>
+          </div>
+          {% if current_user.userType == "Student" %}
+            <div class="col-4" style="text-align: right"> <i class="fas fa-id-card"></i> StudentID: {{id}}</div>
+          {% endif %}
+        </div>
+        <div class="row align-items-center">
+          <div class="col-1" style="width: 30px;">
+            <span><i class="fas fa-envelope"></i></span>
+          </div>
+          <div class="col-2" style="text-align: right"> Email: </div>
+          <div class="col-3" style="text-align: left">{{ current_user.email }}</div>
+        </div>
+        <div class="row align-items-center">
+          <div class="col-1" style="width: 30px;">
+            <span><i class="fas fa-birthday-cake"></i></span>
+          </div>
+          <div class="col-2" style="text-align: right"> Birthday: </div>
+          <div class="col-7" style="text-align: left">{{ dob }}</div>
+          <div class="col-2" style="text-align: right"> <i class="fas fa-calendar-alt"></i> Age: {{ age }}</div>
+        </div>
+  
+        {% if current_user.userType == "Student" %}
+          <div class="row align-items-center">
+            <div class="col-1" style="width: 30px">
+              <span><i class="fas fa-graduation-cap"></i></span>
+            </div>
+            <div class="col-2" style="text-align: right"> Graduates: </div>
+            <div class="col-3" style="text-align: left">{{ gradYear }}</div>
+          </div>
+        {% endif %}
+      </div>
+      <div class="container">
+        <p style="margin: 10px 10px 10px 3%">Wish to change your password?
+        <a href="{{url_for('passedit', uid=uid) }}">Click here</a></p>
+      </div>
+    </body>
+{% endblock %}

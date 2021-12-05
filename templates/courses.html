@@ -1,0 +1,148 @@
+{% include "base.html" %}
+<style>
+  section {
+    display: flex;
+    height: auto;
+    margin: 2px 2% 10px 2%;
+    border-style: solid;
+    border-radius: 25px;
+    border-color: green;
+  }
+
+  div.courses {
+    margin: 10px 4% 0px 2%;
+    padding: 10px 5px 0px 10px;
+    width: 80%;
+  }
+
+  div.info {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+
+  div.register {
+    width: 100%;
+    height: 20%;
+    display: flex;
+    justify-content: center;
+    align-self: flex-start;
+    position: sticky;
+    bottom: 0;
+    border-top: 2px solid green;
+    z-index: 10;
+    padding: 10px 0 10px 0;
+    background-color: white;
+  }
+
+  .btn, .btn-primary:visited { background-color: green !important; border: green;}
+  .btn-primary:hover { background-color: rgb(4, 196, 4); }
+
+  /* ----------------------- Switch CSS ----------------------- */
+  .switch-container {
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    padding-right: 10%;
+    justify-content: space-evenly;
+  }
+
+  input[type="checkbox"].switch {
+    font-size: 30px; appearance: none;
+    width: 3.5em;
+    height: 1.5em;
+    background: #ddd;
+    border-radius: 3em;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    transition: all .2s ease-in-out;
+  }
+
+  input[type="checkbox"].switch:checked { background: green; }
+
+  input[type="checkbox"].switch:after {
+    position: absolute;
+    content: "";
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 .25em rgba(0,0,0,.3);
+    transform: scale(.7);
+    left: 0;
+    transition: all .2s ease-in-out;
+  }
+
+  input[type="checkbox"].switch:checked:after { left: calc(100% - 1.5em); }
+
+</style>
+
+<script type="text/javascript">
+  registered_courses = []
+  $(function() {
+    $('.switch').click(function() {
+      if($(this).is(":checked")) {
+        registered_courses.push($(this).val());
+      }
+      else if($(this).is(":not(:checked)")) {
+        removeItem(registered_courses, $(this).val());
+      }
+    });
+    $('#register').click(function () {
+      $.post('/courses', {'courseList': registered_courses});
+    });
+  });
+  function removeItem(array, item){
+    for(var i in array){
+        if(array[i]==item){
+            array.splice(i,1);
+            break;
+        }
+    }
+  }
+</script>
+
+{% block content %}
+  <h1 style="display: flex; justify-content: center;">Hi, {{ current_user.username }}! This is your course selection</h1>
+    {% for Course in Course_List %}
+      <section>
+        <div class="courses">
+          <p><strong>Title:</strong> {{ Course.numTitle }}</p>
+          <p><strong>Description:</strong> {{ Course.desc }}</p>
+            <div class="info">
+              <p style="width: 150px"><strong>Credits:</strong> {{ Course.numCredits }}</p>
+              <p style="width: 350px"><strong>When:</strong> {{ Course.days }}, {{Course.time}}</p>
+              <p style="width: 250px"><strong>Where:</strong> {{ Course.roomNum }}</p>
+              <p style="width: 250px" style="font-style: italic"><strong>Professor: </strong> {{ Course.profName }}</p>
+            </div>
+         </div>
+        <div class="switch-container">
+          {% if current_user.userType == "Teacher" %}
+              <div>&nbsp;</div>
+          {% endif %}
+            <input type="checkbox" class="switch" id={{loop.index}} value={{Course.numTitle}}>
+          {% if current_user.userType == "Teacher" %}
+            <div>
+              <button type="button" class="btn btn-primary"><a style="color:white" href="{{ url_for('ccreation', cid=Course.courseID) }}"><i class="fas fa-edit"></i>Edit Class</a></button>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+    {% endfor %}
+    <div class="register">
+        <input type="submit" id="register" value="Register" class="btn btn-lg btn-primary btn-block"/>
+    </div>
+    <form action="/get-text" method="POST">
+      <input type="text" name="test">
+      <input type="submit" value="Go">
+      <input type="checkbox" name="Professor" value="Yes">
+      <label for="search1"> Professor</label><br>
+      <input type="checkbox" name="Title" value="Yes">
+      <label for="search2"> Title</label><br>
+      <input type="checkbox" name="Credits" value="Yes">
+      <label for="search3"> Credits</label><br>
+    </form>
+{% endblock %}

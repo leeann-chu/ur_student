@@ -1,0 +1,33 @@
+{% include "base.html" %}
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+  <legend>Sign In</legend>
+  <form action = "/login" method ="post" style="width:60%; margin-left: 50px">
+    <fieldset>
+      {{ form.hidden_tag() }}
+      {{ wtf.form_errors(form, hiddens="only") }}
+      {{ wtf.form_field(form.username, style="font-size: 20px; width: 300px;") }}
+      {{ wtf.form_field(form.password, style="font-size: 20px; width: 300px;") }}
+      <button class="btn btn-primary" type="submit">Sign In</button>
+      <span style="font-size: 15px; margin-left: 10px;"><a href="{{ url_for('passemail', edit='Email') }}">Forgot password?</a></span>
+    </fieldset>
+  </form>
+  <br>
+    <p style="margin-left: 30px">New to URStudent?
+    <a href="{{ url_for('register') }}">Register here</a></p>
+    <div style="min-height:100%; width:80%">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          {% if message == "Please log in to access this page." %}
+            <div class="alert alert-warning"> {{ message }} </div>
+          {% else %}
+            <div class="alert {{category}}"> {{ message }} </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    </div>
+{% endblock %}

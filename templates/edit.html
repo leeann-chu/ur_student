@@ -1,0 +1,38 @@
+{% include "base.html" %}
+<style>
+  .btn {
+    border: purple !important;
+    background-color: purple !important;
+  }
+</style>
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+    <body>
+        <div class="container custom-container">
+        <p class=title> <i class="fas fa-pencil-alt"></i> {{ title }} </p>
+            <form method="POST" role="form">
+            {{ form.hidden_tag() }}
+
+            {{ wtf.form_field(form.name, style="font-size: 20px") }}
+            {{ wtf.form_field(form.email, style="font-size: 20px") }}
+            {{ wtf.form_field(form.dob, style="font-size: 20px") }}
+            {% if userType == "Student" %}
+              {{ wtf.form_field(form.gradYear, style="font-size: 20px") }}
+            {% endif %}
+            {{ wtf.form_field(form.pfp, style="font-size: 20px") }}
+
+              <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save & Finish</button>
+            </form>
+        </div>
+    </body>
+    {% if newUser == "True" %}
+
+    {% else %}
+      <div class="container">
+        <p style="margin: 10px 10px 10px 10px">Wish to change your password?
+        <a href="{{ url_for('passedit', uid=uid) }}">Click here</a></p>
+      </div>
+    {% endif %}
+{% endblock %}

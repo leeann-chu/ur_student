@@ -1,0 +1,18 @@
+{% include "base.html" %}
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+    <legend>Register</legend>
+    <form method="post" role="form" style="width:40%; margin-left: 50px">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+        {{ wtf.form_field(form.username, style="font-size: 20px; width: 60%") }}
+        {{ wtf.form_field(form.email, style="font-size: 20px; width: 80%") }}
+        {{ wtf.form_field(form.password, style="font-size: 20px; width: 60%") }}
+        {{ wtf.form_field(form.password2, style="font-size: 20px; width: 60%") }}
+
+        {{ wtf.form_field(form.userType, style="display: flex; justify-content: flex-start;")}}
+        <button class="btn btn-primary" type="submit">Register</button>
+    </form>
+{% endblock %}

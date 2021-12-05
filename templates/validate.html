@@ -1,0 +1,22 @@
+{% include "base.html" %}
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+<legend>Verification</legend>
+  <form method="post" role="form" style="width:40%; margin-left: 40px;">
+      {{ form.hidden_tag() }}
+      {{ wtf.form_field(form.verification, style="font-size: 20px; width: 150px") }}
+      <button class="btn btn-primary" style = "border-radius: 5px;" type="submit">Verify</button>
+  </form>
+
+  <div style="min-height:100%; width:80%">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{category}}"> {{ message }} </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+{% endblock %}

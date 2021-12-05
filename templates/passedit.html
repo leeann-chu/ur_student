@@ -1,0 +1,48 @@
+{% include "base.html" %}
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+  {% if edit == "Change" %}
+    <legend>Change your password</legend>
+      <form method="post" role="form" style="width:40%; margin-left: 60px;">
+          {{ form.hidden_tag() }}
+          {{ wtf.form_field(form.oldPassword, style="font-size: 20px; width: 300px") }}
+          {{ wtf.form_field(form.newPassword, style="font-size: 20px; width: 300px") }}
+          <button class="btn btn-primary" style = "border-radius: 5px;" type="submit">Change Password</button>
+      </form>
+  {% endif %}
+
+  {% if edit == "Email" %}
+    <legend>Reset your password</legend>
+      <form method="post" role="form" style="width:40%; margin-left: 60px;">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_field(form.email, style="font-size: 20px; width: 300px") }}
+        <button class="btn btn-primary" style = "border-radius: 5px;" type="submit">Reset Password</button>
+      </form>
+  {% endif %}
+
+  {% if edit == "Done" %}
+      <p style="margin-left: 20px">Check your email for password reset link and close this tab.</p>
+  {% endif %}
+
+  {% if edit == "Reset" %}
+    <legend>Reset your password</legend>
+      <form method="post" role="form" style="width:40%; margin-left: 60px;">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_field(form.password, style="font-size: 20px; width: 300px") }}
+        {{ wtf.form_field(form.password2, style="font-size: 20px; width: 300px") }}
+        <button class="btn btn-primary" style = "border-radius: 5px;" type="submit">Reset Password</button>
+      </form>
+  {% endif %}
+    
+  <div style="min-height:100%; width:80%">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{category}}"> {{ message }} </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+{% endblock %}

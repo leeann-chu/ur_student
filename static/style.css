@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&family=Fleur+De+Leah&family=Klee+One:wght@600&family=Rampart+One&family=Stick+No+Bills&family=Zen+Tokyo+Zoo&display=swap');
+
+legend { margin-left: 30px; }
+p, body, div, legend {
+	font-size: 20px;
+	font-family: 'Atkinson Hyperlegible', sans-serif;
+}
+
+/* ----------- Base CSS ----------- */
+p.homepage { margin-top: 10px; }
+
+a { text-decoration: none !important; }
+
+div.homerow {
+	display: flex;
+	justify-content: space-around;
+	padding: 10px;
+	background-color: white;
+}
+
+a.homepage { font-size: 40px; }
+a.homepage:hover i { transform: scale(1.5); }
+
+div.banner {
+	height: 80px;
+	line-height: 80px;
+	padding-left: 15px;
+	margin: auto;
+	color: white;
+}
+
+.banner.purple { background-color: purple; }
+.banner.blue { background-color: #0d6efd; }
+.banner.green { background-color: green; }
+.banner.darkred { background-color: darkred; }
+
+a.purple { color: purple; }
+a.blue { color: #0d6efd; }
+a.green { color: green; }
+a.darkred { color: darkred; }
+
+a.purple:hover { color: rgb(212, 50, 212); }
+a.green:hover { color: rgb(4, 196, 4); }
+a.darkred:hover { color: rgb(235, 38, 38); }
+
+/* ----------- Profile CSS ----------- */
+
+#editText {
+	display: none;
+	font-size: 18px;
+}
+
+div.custom-container {
+	margin-top: 5px;
+	padding: 10px 25px 25px 25px;
+	width: 80%;
+	border-style: solid;
+	border-color: purple;
+	border-radius: 10px;
+}
+
+div.pfp {
+	height: 340px;
+	width: 340px;
+	padding: 20px;
+	margin: auto;
+}
+
+img {
+	object-fit: cover;
+	border-radius: 10px;
+	height: 100%;
+	width: 100%;
+}
+
+/* ----------- Alerts CSS ----------- */
+
+.alert {
+	margin-left: 30px;
+	margin-top: 10px;
+}
+
+.alert-error {
+	color: rgb(107, 26, 26);
+	background-color: rgb(248, 177, 177);
+}
+
+/* ----------- Register Row ----------- */
+div.register {
+	position: sticky;
+    z-index: 15; /* on top of calendar */
+}
