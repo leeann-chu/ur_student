@@ -16,7 +16,7 @@
           <p>View and customize your profile</p>
       </div>
       <div class="col">
-        <a class="homepage" href="{{ url_for('courses') }}">
+        <a class="homepage" href="{{ url_for('courses', uid=current_user.id, view='True') }}">
           <i class="fas fa-th-list"></i>
           <p class="homepage">Course Selection</p>
         </a>

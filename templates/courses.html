@@ -24,21 +24,36 @@
 
   div.register {
     width: 100%;
-    height: 20%;
-    display: flex;
-    justify-content: center;
-    align-self: flex-start;
-    position: sticky;
+    height: 50px;
+    position: fixed;
     bottom: 0;
     border-top: 2px solid green;
-    z-index: 10;
-    padding: 10px 0 10px 0;
+    z-index: 5;
     background-color: white;
+    padding: 5px 0 10px 0;
+    display: flex;
   }
 
-  .btn, .btn-primary:visited { background-color: green !important; border: green;}
-  .btn-primary:hover { background-color: rgb(4, 196, 4); }
+  #register {
+    z-index: 10;
+    position: fixed;
+    bottom: 1px;
+    right: 10px;
+  }
 
+  div.checkbox { user-select: none; }
+  div.input-group { margin-left: 10px; }
+
+  input.form-control {
+    border-radius: 20px;
+    height: 35px;
+    width: 300px !important;
+    border: 2px solid green;
+    flex: 0 auto !important;
+  }
+
+  .btn-primary, .btn-primary:visited { background-color: green !important; border: green; color: white;}
+  .btn-primary:hover { background-color: rgb(4, 196, 4); }
   /* ----------------------- Switch CSS ----------------------- */
   .switch-container {
     display: flex;
@@ -79,70 +94,85 @@
   input[type="checkbox"].switch:checked:after { left: calc(100% - 1.5em); }
 
 </style>
-
+<p hidden class="list" data-list="{{registered_courses}}"></p>
 <script type="text/javascript">
-  registered_courses = []
   $(function() {
+    const registered_courses = $('.list').data("list")
+    if (jQuery.isEmptyObject(registered_courses) == false) {
+      const regex = /(?<= ).(?=,)/gm;
+      const resultMatchGroup = registered_courses.match(regex);
+      const regCourses_byID = resultMatchGroup.map(match => match.replace(regex, "$1"))
+
+      $.each($('.switch'), function() {
+        let courseID = $(this).val();
+        if (jQuery.inArray(courseID, regCourses_byID) !== -1) {
+          $(this).attr("checked", true);
+          $(`#${courseID}`).css("background-color", "LightGray");
+          $(`.${courseID}`).attr('name', courseID)
+        }
+      });
+    }
+
     $('.switch').click(function() {
       if($(this).is(":checked")) {
-        registered_courses.push($(this).val());
+        let courseID = $(this).val();
+        $(`#${courseID}`).css("background-color", "LightGray");
+        $(`.${courseID}`).attr('name', courseID)
       }
       else if($(this).is(":not(:checked)")) {
-        removeItem(registered_courses, $(this).val());
+        let courseID = $(this).val();
+        $(`#${courseID}`).css("background-color", "white");
+        $(`.${courseID}`).removeAttr('name')
       }
     });
-    $('#register').click(function () {
-      $.post('/courses', {'courseList': registered_courses});
-    });
   });
-  function removeItem(array, item){
-    for(var i in array){
-        if(array[i]==item){
-            array.splice(i,1);
-            break;
-        }
-    }
-  }
 </script>
 
 {% block content %}
   <h1 style="display: flex; justify-content: center;">Hi, {{ current_user.username }}! This is your course selection</h1>
-    {% for Course in Course_List %}
-      <section>
-        <div class="courses">
-          <p><strong>Title:</strong> {{ Course.numTitle }}</p>
-          <p><strong>Description:</strong> {{ Course.desc }}</p>
-            <div class="info">
-              <p style="width: 150px"><strong>Credits:</strong> {{ Course.numCredits }}</p>
-              <p style="width: 350px"><strong>When:</strong> {{ Course.days }}, {{Course.time}}</p>
-              <p style="width: 250px"><strong>Where:</strong> {{ Course.roomNum }}</p>
-              <p style="width: 250px" style="font-style: italic"><strong>Professor: </strong> {{ Course.profName }}</p>
-            </div>
-         </div>
-        <div class="switch-container">
-          {% if current_user.userType == "Teacher" %}
-              <div>&nbsp;</div>
-          {% endif %}
-            <input type="checkbox" class="switch" id={{loop.index}} value={{Course.numTitle}}>
-          {% if current_user.userType == "Teacher" %}
-            <div>
-              <button type="button" class="btn btn-primary"><a style="color:white" href="{{ url_for('ccreation', cid=Course.courseID) }}"><i class="fas fa-edit"></i>Edit Class</a></button>
-            </div>
-          {% endif %}
-        </div>
-      </section>
-    {% endfor %}
-    <div class="register">
-        <input type="submit" id="register" value="Register" class="btn btn-lg btn-primary btn-block"/>
-    </div>
-    <form action="/get-text" method="POST">
-      <input type="text" name="test">
-      <input type="submit" value="Go">
-      <input type="checkbox" name="Professor" value="Yes">
-      <label for="search1"> Professor</label><br>
-      <input type="checkbox" name="Title" value="Yes">
-      <label for="search2"> Title</label><br>
-      <input type="checkbox" name="Credits" value="Yes">
-      <label for="search3"> Credits</label><br>
+    <form action="/courses/False{{ uid }}" method="POST">
+      {% for Course in Course_List %}
+        <section id={{Course.courseID}}>
+          <div class="courses">
+            <p><strong>Title:</strong> {{ Course.numTitle }}</p>
+            <p><strong>Description:</strong> {{ Course.desc }}</p>
+              <div class="info">
+                <p style="width: 150px"><strong>Credits:</strong> {{ Course.numCredits }}</p>
+                <p style="width: 350px"><strong>When:</strong> {{ Course.days }}, {{Course.time}}</p>
+                <p style="width: 250px"><strong>Where:</strong> {{ Course.roomNum }}</p>
+                <p style="width: 250px" style="font-style: italic"><strong>Professor: </strong> {{ Course.profName }}</p>
+              </div>
+          </div>
+          <div class="switch-container">
+            {% if current_user.userType == "Teacher" %}
+                <div>&nbsp;</div>
+            {% endif %}
+              <input type="checkbox" class="switch" value={{Course.courseID}}>
+              <input type="hidden" class={{Course.courseID}}>
+            {% if current_user.userType == "Teacher" %}
+              <div>
+                <button type="button" class="btn btn-primary"><a style="color:white" href="{{ url_for('ccreation', cid=Course.courseID) }}"><i class="fas fa-edit"></i>Edit Class</a></button>
+              </div>
+            {% endif %}
+          </div>
+        </section>
+      {% endfor %}
+      <button class="btn btn-lg btn-primary" id="register">Register</button>
     </form>
+    <div style="margin-bottom: 30px;">&nbsp;</div>
+    <div class="register">
+      <form action="/courses/True{{ uid }}" method="POST">
+        <div class="input-group">
+          <input type="text" class="form-control" name="searchInput">
+          <div class="input-group-append">
+            <button class="btn btn-primary" type="submit">Search</button>
+          </div>
+          <div class="checkbox">
+            <label for="Professor"><input type="checkbox" name="Professor" style="width: 30px">by Professor</label>
+            <label for="Title"><input type="checkbox" name="Title" style="width: 30px">by Title</label>
+            <label for="Credits" style="margin-right: 40px"><input type="checkbox" name="Credits" style="width: 30px">by Credits </label>
+          </div>
+        </div>
+      </form>
+    </div>
 {% endblock %}

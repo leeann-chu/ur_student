@@ -60,7 +60,7 @@ class CourseCreation(FlaskForm):
     numCredits = StringField('Credits')
     roomNum = StringField('Room number')
     days = SelectField('Course schedule', choices=[(""), ("M/W"), ("T/Th"), ("F")])
-    time = StringField('Course time')
+    time = StringField('Course time', [DataRequired()])
 
 class EditPassword(FlaskForm):
     oldPassword = PasswordField('Old Password', [DataRequired()])
@@ -77,6 +77,3 @@ class ResetPasswordForm(FlaskForm):
     password = PasswordField('New Password')
     password2 = PasswordField('Repeat Password', [EqualTo('password')])
     submit = SubmitField('Reset Password')
-
-class ClassesRegister(FlaskForm):
-    submit = SubmitField('Register for Selected Classes')

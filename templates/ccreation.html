@@ -51,7 +51,7 @@
             </form>
         </div>
       <div class="BackButton">
-          <button type="button" class="btn btn-lg btn-primary"><a style="color:white" href="{{ url_for('courses') }}">View Courses</a></button>
+          <button type="button" class="btn btn-lg btn-primary"><a style="color:white" href="{{ url_for('courses', uid=current_user.id, view='True') }}">View Courses</a></button>
       </div>
     </body>
 {% endblock %}

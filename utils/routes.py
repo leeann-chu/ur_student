@@ -1,6 +1,7 @@
+import enum
 from flask import render_template, flash, redirect, request, url_for
 from flask_login import login_user, logout_user, current_user, login_required
-from utils.forms import LoginForm, RegistrationForm, TwoFactorForm, EditForm, CourseCreation, EditPassword, ResetPasswordForm, ClassesRegister
+from utils.forms import LoginForm, RegistrationForm, TwoFactorForm, EditForm, CourseCreation, EditPassword, ResetPasswordForm
 from utils.models import User, Student, Courses
 from main import db, app
 from random import randrange, choice
@@ -152,44 +153,60 @@ def passreset(edit, email): #*
             return redirect(url_for('login'))
     return render_template('passedit.html', title="Reset Password", form=form, edit=edit, color='purple') ##
 
-@app.route("/courses", methods=['GET', 'POST'])
-def courses(): #*
+@app.route('/courses/<view><int:uid>', methods=['GET', 'POST'])
+def courses(uid, view): #*
+    student = Student.query.filter_by(userID=uid).first()
     Course_List = Courses.query.all()
-    return render_template('courses.html', title='Course Selection', Course_List=Course_List, color='green', info="Course Selection") ##
+    try: #* Search Operation
+        search = (request.form['searchInput']).lower()
+        searchFields = []
+        try:
+            check = request.form["Professor"]
+            searchFields.append('Professor')
+        except: pass
+        try:
+            check = request.form['Title']
+            searchFields.append('Title')
+        except: pass
+        try:
+            check = request.form['Credits']
+            searchFields.append('Credits')
+        except: pass
 
-@app.route('/get-text', methods=['GET', 'POST'])
-def search():
-    search = request.form['test']
-    searchFields = []
-    try:
-        check = request.form["Professor"]
-        searchFields.append('Professor')
-    except: pass
-    try:
-        check = request.form['Title']
-        searchFields.append('Title')
-    except: pass
-    try:
-        check = request.form['Credits']
-        searchFields.append('Credits')
-    except: pass
+        All_Courses = Courses.query.all()
+        Course_List = []
+        for Course in All_Courses:
+            if 'Professor' in searchFields:
+                if search in Course.profName.lower():
+                    Course_List.append(Course)
 
-    All_Courses = Courses.query.all()
-    Course_List = []
-    for Course in All_Courses:
-        if 'Professor' in searchFields:
-            if search in Course.profName:
-                Course_List.append(Course)
+            if 'Title' in searchFields:
+                if search in Course.numTitle.lower():
+                    Course_List.append(Course)
 
-        if 'Title' in searchFields:
-            if search in Course.numTitle:
-                Course_List.append(Course)
+            if 'Credits' in searchFields:
+                if search in str(Course.numCredits):
+                    Course_List.append(Course)
 
-        if 'Credits' in searchFields:
-            if search in Course.numCredits:
-                Course_List.append(Course)
+            if not searchFields:
+                if search in (Course.numTitle).lower() or search in (Course.profName).lower() or search in str(Course.numCredits):
+                        Course_List.append(Course)
+    except: pass  ##
+    if view == "True":
+        return render_template('courses.html', title='Course Selection', Course_List=Course_List, uid=uid, registered_courses=student.rel_courses, view=view, color='green', info="View Course Selection")
 
-    return render_template('courses.html', title='Course Selection', Course_List=Course_List, color='green', info="Course Selection")
+    try: #* Register for Classes
+        tempRegCourses = []
+        for course in Course_List:
+            try:
+                check = request.form[str(course.courseID)]
+                tempRegCourses.append(course)
+            except: pass
+        student.rel_courses = tempRegCourses
+        db.session.commit()
+    except: pass ##
+    print(student.rel_courses)
+    return render_template('courses.html', title='Course Selection', Course_List=Course_List, uid=uid, registered_courses=student.rel_courses, view='False', color='green', info="View Course Selection") ##
 
 @app.route("/ccreation/<int:cid>", methods=['GET', 'POST'])
 def ccreation(cid): #*
@@ -224,18 +241,30 @@ def ccreation(cid): #*
             course.numCredits = form.numCredits.data
             course.days = form.days.data
             course.time = form.time.data
-
+    
             time = form.time.data.split(":")[0]
             course.slotNum = slotTimes.get(int(time), "invalid time")
-            print(course.slotNum)
             db.session.commit()
-
-            return redirect(url_for('courses'))
+            return redirect(url_for('courses', view='True', uid=current_user.id))
     return render_template('ccreation.html', title='Course Creation', form=form, color='green', info="Course Creation") ##
 
+class Event:
+    def __init__(self, name, day1, day2, time, slotNum):
+        self.name = name
+        self.day1 = day1
+        self.day2 = day2
+        self.time = time
+        self.slotNum = slotNum
+        
 @app.route("/schedule/<int:uid>")
-def schedule(uid):
-    return render_template('schedule.html', title='Schedule', uid=uid, color='darkred', info="Your Schedule")
+def schedule(uid): #*
+    student = Student.query.filter_by(userID=uid).first()
+    eventList = []
+    for course in student.rel_courses:
+        event = Event(course.numTitle.split(":")[0], course.days[:1].lower(), course.days[-1].lower(), course.time, course.slotNum)
+        eventList.append(event)
+    print(eventList)
+    return render_template('schedule.html', title='Schedule', uid=uid, color='darkred', eventList = eventList, info="Your Schedule") ##
 
 @app.route('/logout')
 def logout():
