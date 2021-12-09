@@ -194,18 +194,25 @@ def courses(uid, view): #*
     except: pass  ##
     if view == "True":
         return render_template('courses.html', title='Course Selection', Course_List=Course_List, uid=uid, registered_courses=student.rel_courses, view=view, color='green', info="View Course Selection")
-
-    try: #* Register for Classes
+    
+    try: #* Register for Classes 
         tempRegCourses = []
+        print(request.form)
         for course in Course_List:
             try:
                 check = request.form[str(course.courseID)]
                 tempRegCourses.append(course)
             except: pass
+            try:
+                del_course = f"-{course.courseID}"
+                check = request.form[del_course]
+                db.session.delete(course)
+                db.session.commit()
+                return redirect(url_for('courses', uid=uid, view='True'))
+            except: pass
         student.rel_courses = tempRegCourses
         db.session.commit()
     except: pass ##
-    print(student.rel_courses)
     return render_template('courses.html', title='Course Selection', Course_List=Course_List, uid=uid, registered_courses=student.rel_courses, view='False', color='green', info="View Course Selection") ##
 
 @app.route("/ccreation/<int:cid>", methods=['GET', 'POST'])

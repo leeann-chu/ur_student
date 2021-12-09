@@ -56,11 +56,11 @@ class EditForm(FlaskForm):
 class CourseCreation(FlaskForm):
     numTitle = StringField('Course Number and Title', [DataRequired()])
     desc = TextAreaField('Enter your a quick description of your course')
-    profName = StringField('Enter the professor\'s name')
+    profName = StringField('Enter the professor\'s first and last name')
     numCredits = StringField('Credits')
     roomNum = StringField('Room number')
     days = SelectField('Course schedule', choices=[(""), ("M/W"), ("T/Th"), ("F")])
-    time = StringField('Course time', [DataRequired()])
+    time = StringField('Course time (Ex: 7:40PM-8:55PM)', [DataRequired()])
 
 class EditPassword(FlaskForm):
     oldPassword = PasswordField('Old Password', [DataRequired()])
