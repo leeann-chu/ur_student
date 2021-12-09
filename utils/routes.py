@@ -256,7 +256,8 @@ def ccreation(cid): #*
     return render_template('ccreation.html', title='Course Creation', form=form, color='green', info="Course Creation") ##
 
 class Event:
-    def __init__(self, name, day1, day2, time, slotNum):
+    def __init__(self, cid, name, day1, day2, time, slotNum):
+        self.cid = cid
         self.name = name
         self.day1 = day1
         self.day2 = day2
@@ -268,10 +269,15 @@ def schedule(uid): #*
     student = Student.query.filter_by(userID=uid).first()
     eventList = []
     for course in student.rel_courses:
-        event = Event(course.numTitle.split(":")[0], course.days[:1].lower(), course.days[-1].lower(), course.time, course.slotNum)
+        event = Event(course.courseID, course.numTitle.split(":")[0], course.days[:1].lower(), course.days[-1].lower(), course.time, course.slotNum)
         eventList.append(event)
-    print(eventList)
     return render_template('schedule.html', title='Schedule', uid=uid, color='darkred', eventList = eventList, info="Your Schedule") ##
+
+@app.route("/schedule/vcourse.html/<int:cid>")
+def vcourse(cid):
+    course = Courses.query.filter_by(courseID=cid).first()
+    print(course)
+    return render_template('vcourse.html', cid=cid, Course=course, title=course.numTitle, color='green', info=course.numTitle)
 
 @app.route('/logout')
 def logout():

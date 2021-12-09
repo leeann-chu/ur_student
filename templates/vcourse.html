@@ -1,0 +1,23 @@
+{% include "base.html" %}
+<style>
+    .btn {
+      border: green !important;
+      background-color: green !important;
+    }
+</style>
+
+{% block content %}
+<div class="courses" style="height: 700px">
+    <p><strong>Title:</strong> {{ Course.numTitle }}</p>
+    <p><strong>Description:</strong> {{ Course.desc }}</p>
+    <div class="info">
+        <p style="width: 150px"><strong>Credits:</strong> {{ Course.numCredits }}</p>
+        <p style="width: 350px"><strong>When:</strong> {{ Course.days }}, {{Course.time}}</p>
+        <p style="width: 250px"><strong>Where:</strong> {{ Course.roomNum }}</p>
+        <p style="width: 250px" style="font-style: italic"><strong>Professor: </strong> {{ Course.profName }}</p>
+    </div>
+</div>
+<div class="BackButton">
+    <button type="button" class="btn btn-lg btn-primary"><a style="color:white;" href="{{ url_for('schedule', uid=current_user.id) }}">View Schedule</a></button>
+</div>
+{% endblock %}

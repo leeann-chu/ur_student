@@ -73,7 +73,7 @@
     z-index: 5;
     height: 62.5px;
   }
-
+  
   /* 9 - 10:15 */
   .slot1 { grid-row: 3; }
   /* 10:25 - 11:40 */
@@ -112,7 +112,6 @@
   pre.time {
     font-size: 13px;
   }
-
 </style>
 
 {% block content %}
@@ -170,11 +169,11 @@
 
     {% for event in eventList %}
       <div class="event slot{{ event.slotNum }} {{ event.day1 }}">
-        <span>{{event.name}}</span>
+        <span class="customEvent"><a class="divLink" href="{{url_for('vcourse', cid=event.cid)}}">{{event.name}}</a></span>
         <pre class="time">{{ event.time }}</pre>
       </div>
       <div class="event slot{{ event.slotNum }} {{ event.day2 }}">
-        <span>{{event.name}}</span>
+        <span class="customEvent"><a class="divLink" href="{{url_for('vcourse', cid=event.cid)}}">{{event.name}}</a></span>
         <pre class="time">{{ event.time }}</pre>
       </div>
     {% endfor %}
