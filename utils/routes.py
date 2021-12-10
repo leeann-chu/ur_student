@@ -1,5 +1,5 @@
 import enum
-from flask import render_template, flash, redirect, request, url_for
+from flask import render_template, flash, redirect, request, url_for, Markup
 from flask_login import login_user, logout_user, current_user, login_required
 from utils.forms import LoginForm, RegistrationForm, TwoFactorForm, EditForm, CourseCreation, EditPassword, ResetPasswordForm
 from utils.models import User, Student, Courses
