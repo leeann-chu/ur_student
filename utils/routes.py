@@ -153,67 +153,174 @@ def passreset(edit, email): #*
             return redirect(url_for('login'))
     return render_template('passedit.html', title="Reset Password", form=form, edit=edit, color='purple') ##
 
-@app.route('/courses/<view><int:uid>', methods=['GET', 'POST'])
-def courses(uid, view): #*
-    student = Student.query.filter_by(userID=uid).first()
-    Course_List = Courses.query.all()
-    try: #* Search Operation
-        search = (request.form['searchInput']).lower()
-        searchFields = []
-        try:
-            check = request.form["Professor"]
-            searchFields.append('Professor')
-        except: pass
-        try:
-            check = request.form['Title']
-            searchFields.append('Title')
-        except: pass
-        try:
-            check = request.form['Credits']
-            searchFields.append('Credits')
-        except: pass
+@app.route("/courses/<int:uid>", methods=['GET', 'POST'])
+def courses(uid): #*
 
-        All_Courses = Courses.query.all()
+    student = Student.query.filter_by(userID=uid).first()
+    Registered = [int(course.courseID) for course in student.rel_courses]
+
+    try:
+        Course_ID = int(request.form['Delete'])
+        course = Courses.query.filter_by(courseID=Course_ID).first()
+        db.session.delete(course)
+        db.session.commit()
+    
+    except: pass
+
+    try:
+        Num = int(request.form['LoopCounter'])
+
+    except: pass
+
+    try:  # Hey, Im almost positive we never need to have course_ids as str. Change it up in Registereed too so everything agrees
+        # actually no, I dont think we need registered anymore do we? control f and see.
+        # hmm, but can we make it so we only have to commit once?
+        Num = int(request.form['LoopCounter'])
+        #print(Registered)
+        print("student.rel_courses", student.rel_courses)
+        COURSE = []
+        for i in range(Num):
+            COURSEID = int(request.form[str(i + 1)])
+            print(COURSEID)
+            COURSE.append(COURSEID)
+        COURSE.sort()
+        print('sorted', COURSE)
+        for i in COURSE:  ## change registered to ints
+            if i < 0:
+                x = i * -1
+                print('to be removed', x)
+                cor = Courses.query.filter_by(courseID=x).first()
+                if cor in student.rel_courses:
+                    #Registered.remove(x)
+                    #Course = Courses.query.filter_by(courseID=x).first()
+                    student.rel_courses.remove(cor)
+                    db.session.commit()
+                    print('rel_courses deleted', student.rel_courses)
+                else: pass
+            else:
+                cor = Courses.query.filter_by(courseID=i).first()
+                if cor not in student.rel_courses:
+                    Days = [(str(course.days), str(course.time)) for course in student.rel_courses]
+                    #Course = Courses.query.filter_by(courseID=x).first()
+                    Day = (str(cor.days), str(cor.time))
+
+                    if Day in Days:
+                        Index = Days.index(Day)
+                        Conflict = student.rel_courses[Index].numTitle
+                        message = Markup("<h2>Unable to register for {0}. Conflict detected with {1}.</h2>".format(cor.numTitle, Conflict))
+                        flash(message)
+
+                    else:
+                        #Registered.append(x)
+                        #Course = Courses.query.filter_by(courseID=x).first() ###
+                        student.rel_courses.append(cor) ###
+                        db.session.commit() ###
+                else: pass
+    except: pass
+
+
+                # remove it. Figure out tomorrow. I need a shower. 
+
+
+    '''try:
+        for i in range(Num):
+            try:
+                COURSE_ID = request.form[str(i + 1)]
+
+                if int(COURSE_ID) < 0:
+                    COURSE_ID = COURSE_ID.replace('-', '')
+
+                    if COURSE_ID in Registered:
+                        Registered.remove(COURSE_ID)
+                        Course = Courses.query.filter_by(courseID=int(COURSE_ID)).first() ###
+                        student.rel_courses.remove(Course) ###
+                        db.session.commit() ###
+
+                    else: pass
+
+                else:
+                    if COURSE_ID not in Registered:
+                        Days = [(str(course.days), str(course.time)) for course in student.rel_courses]
+                        Course = Courses.query.filter_by(courseID=COURSE_ID).first()
+                        Day = (str(Course.days), str(Course.time))
+
+                        if Day in Days:
+                            Index = Days.index(Day)
+                            Conflict = student.rel_courses[Index].numTitle
+                            message = Markup("<h2>Unable to register for {0}. Conflict detected with {1}.</h2>".format(Course.numTitle, Conflict))
+                            flash(message)
+
+                        else:
+                            Registered.append(COURSE_ID)
+                            Course = Courses.query.filter_by(courseID=int(COURSE_ID)).first() ###
+                            student.rel_courses.append(Course) ###
+                            db.session.commit() ###
+
+                    else: pass
+
+            except: pass
+    except: pass'''
+
+    '''REGISTERED_COURSES = []
+    for i in Registered:
+        Course = Courses.query.filter_by(courseID=int(i)).first()
+        REGISTERED_COURSES.append(Course)
+
+    student.rel_courses = REGISTERED_COURSES
+    db.session.commit()'''
+
+    #except: pass
+
+    try:
+        Search = (request.form['SearchButton']).lower()
+        Search_Fields = []
+    
+    except:
+        Search_Fields = None
+
+    try:
+        check_ = request.form["Professor"]
+        Search_Fields.append('Professor')
+    
+    except: pass
+    
+    try:
+        check_ = request.form['Title']
+        Search_Fields.append('Title')
+    
+    except: pass
+
+    try:
+        check_ = request.form['Credits']
+        Search_Fields.append('Credits')
+
+    except: pass
+    
+    All_Courses = Courses.query.all()
+    if Search_Fields == None:
+        Course_List = All_Courses
+
+    else:
         Course_List = []
         for Course in All_Courses:
-            if 'Professor' in searchFields:
-                if search in Course.profName.lower():
+            if 'Professor' in Search_Fields:
+                if Search in (Course.profName).lower():
                     Course_List.append(Course)
 
-            if 'Title' in searchFields:
-                if search in Course.numTitle.lower():
+            if 'Title' in Search_Fields:
+                if Search in (Course.numTitle).lower():
+                    Course_List.append(Course)
+            
+            if 'Credits' in Search_Fields:
+                if Search in str(Course.numCredits):
+                    Course_List.append(Course)
+            
+            if Search_Fields == []:
+                if Search in (Course.numTitle).lower() or Search in (Course.profName).lower() or Search in str(Course.numCredits):
                     Course_List.append(Course)
 
-            if 'Credits' in searchFields:
-                if search in str(Course.numCredits):
-                    Course_List.append(Course)
-
-            if not searchFields:
-                if search in (Course.numTitle).lower() or search in (Course.profName).lower() or search in str(Course.numCredits):
-                        Course_List.append(Course)
-    except: pass  ##
-    if view == "True":
-        return render_template('courses.html', title='Course Selection', Course_List=Course_List, uid=uid, registered_courses=student.rel_courses, view=view, color='green', info="View Course Selection")
-    
-    try: #* Register for Classes 
-        tempRegCourses = []
-        print(request.form)
-        for course in Course_List:
-            try:
-                check = request.form[str(course.courseID)]
-                tempRegCourses.append(course)
-            except: pass
-            try:
-                del_course = f"-{course.courseID}"
-                check = request.form[del_course]
-                db.session.delete(course)
-                db.session.commit()
-                return redirect(url_for('courses', uid=uid, view='True'))
-            except: pass
-        student.rel_courses = tempRegCourses
-        db.session.commit()
-    except: pass ##
-    return render_template('courses.html', title='Course Selection', Course_List=Course_List, uid=uid, registered_courses=student.rel_courses, view='False', color='green', info="View Course Selection") ##
+    To_Shade = [str(course.courseID) for course in student.rel_courses]
+    return render_template('courses.html', title='Course Selection', To_Shade=To_Shade, Course_List=Course_List, Registered=Registered, uid=uid, student=student, color='green', info="Course Selection") ##
 
 @app.route("/ccreation/<int:cid>", methods=['GET', 'POST'])
 def ccreation(cid): #*
