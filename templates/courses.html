@@ -1,3 +1,4 @@
+
 {% include "base.html" %}
 <style>
   section {
@@ -7,6 +8,12 @@
     border-style: solid;
     border-radius: 25px;
     border-color: green;
+  }
+
+  div.courses {
+    margin: 10px 4% 0px 2%;
+    padding: 10px 5px 0px 10px;
+    width: 80%;
   }
 
   div.info {
@@ -46,9 +53,26 @@
     flex: 0 auto !important;
   }
 
-  .btn-primary, .btn-primary:visited { background-color: green !important; border: green; color: white;}
+  form.SearchForm {
+    display: flex;
+    justify-content: space-around;
+    width: 40%
+  }
+
+  div.SearchParameters {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  input.SearchCheck {
+    margin-right: 5px;
+  }
+
+  .btn, .btn-primary:visited { background-color: green !important; border: green;} 
   .btn-primary:hover { background-color: rgb(4, 196, 4); }
-  /* ----------------------- Switch CSS ----------------------- */
+
+  /* ----------------------- Switch CSS ----------------------- */ 
   .switch-container {
     display: flex;
     flex-shrink: 0;
@@ -88,51 +112,23 @@
   input[type="checkbox"].switch:checked:after { left: calc(100% - 1.5em); }
 
 </style>
-<p hidden class="list" data-list="{{registered_courses}}"></p>
-<script type="text/javascript">
-  $(function() {
-    const registered_courses = $('.list').data("list")
-    if (jQuery.isEmptyObject(registered_courses) == false) {
-      const regex = /(?<= ).(?=,)/gm;
-      const resultMatchGroup = registered_courses.match(regex);
-      const regCourses_byID = resultMatchGroup.map(match => match.replace(regex, "$1"))
-
-      $.each($('.switch'), function() {
-        let courseID = $(this).val();
-        if (jQuery.inArray(courseID, regCourses_byID) !== -1) {
-          $(this).attr("checked", true);
-          $(`#${courseID}`).css("background-color", "LightGray");
-          $(`.${courseID}`).attr('name', courseID)
-        }
-      });
-    }
-
-    $('.switch').click(function() {
-      if($(this).is(":checked")) {
-        let courseID = $(this).val();
-        $(`#${courseID}`).css("background-color", "LightGray");
-        $(`.${courseID}`).attr('name', courseID)
-      }
-      else if($(this).is(":not(:checked)")) {
-        let courseID = $(this).val();
-        $(`#${courseID}`).css("background-color", "white");
-        $(`.${courseID}`).removeAttr('name')
-      }
-    });
-  });
-</script>
 
 {% block content %}
   <h1 style="display: flex; justify-content: center;">Hi, {{ current_user.username }}! This is your course selection</h1>
-    <form action="/courses/False{{ uid }}" method="POST">
+  <div class="flashes" style="display: flex; justify-content: center; color: orangered">
+    {% for message in get_flashed_messages() %}
+      {{ message }}
+    {% endfor %}
+  </div>
+    <form action="/courses/{{ uid }}" method="POST" class="MasterCourseForm">
       {% for Course in Course_List %}
-        <section id={{Course.courseID}}>
+        <section name={{Course.courseID}}>
           <div class="courses">
             <p><strong>Title:</strong> {{ Course.numTitle }}</p>
             <p><strong>Description:</strong> {{ Course.desc }}</p>
               <div class="info">
                 <p style="width: 150px"><strong>Credits:</strong> {{ Course.numCredits }}</p>
-                <p style="width: 350px"><strong>When:</strong> {{ Course.days }}, {{Course.time}}</p>
+                <p style="width: 350px"><strong>When:</strong> {{ Course.days }}, {{ Course.time }}</p>
                 <p style="width: 250px"><strong>Where:</strong> {{ Course.roomNum }}</p>
                 <p style="width: 250px" style="font-style: italic"><strong>Professor: </strong> {{ Course.profName }}</p>
               </div>
@@ -140,11 +136,11 @@
           <div class="switch-container">
             {% if current_user.userType == "Teacher" %}
               <div>
-                <button type="submit" class="btn btn-danger" name=-{{Course.courseID}}><i class="fas fa-trash"></i>Delete Class</button>
+                <button type="submit" class="btn btn-danger" value={{Course.courseID}} name="Delete" style="background-color: red !important;"><i class="fas fa-trash"></i>Delete Class</button>
               </div>
             {% endif %}
-              <input type="checkbox" class="switch" value={{Course.courseID}}>
-              <input type="hidden" class={{Course.courseID}}>
+              <input type="checkbox" class="switch" id={{Course.courseID}} value={{Course.courseID}} name={{loop.index}}>
+              <input type='hidden' value='-{{Course.courseID}}' name={{loop.index}}>
             {% if current_user.userType == "Teacher" %}
               <div>
                 <button type="button" class="btn btn-primary"><a style="color:white" href="{{ url_for('ccreation', cid=Course.courseID) }}"><i class="fas fa-edit"></i>Edit Class</a></button>
@@ -152,23 +148,48 @@
             {% endif %}
           </div>
         </section>
+        <p id="To_Shade" style="display: none">{{ To_Shade }}</p>
       {% endfor %}
       <button class="btn btn-lg btn-primary" id="register">Register</button>
+      <input type="hidden" value="{{Course_List|length}}" name="LoopCounter">
+
     </form>
-    <div style="margin-bottom: 30px;">&nbsp;</div>
-    <div class="register">
-      <form action="/courses/True{{ uid }}" method="POST">
-        <div class="input-group">
-          <input type="text" class="form-control" name="searchInput">
-          <div class="input-group-append">
-            <button class="btn btn-primary" type="submit">Search</button>
-          </div>
-          <div class="checkbox">
-            <label for="Professor"><input type="checkbox" name="Professor" style="width: 30px">by Professor</label>
-            <label for="Title"><input type="checkbox" name="Title" style="width: 30px">by Title</label>
-            <label for="Credits" style="margin-right: 40px"><input type="checkbox" name="Credits" style="width: 30px">by Credits </label>
-          </div>
+
+    <script type="text/javascript">
+      try {
+        let newArray = document.getElementById("To_Shade").innerText
+        for (let i = 0; i < newArray.length; i++) {
+          try{
+            document.getElementsByName(newArray[i])[0].style.backgroundColor = "LightGray";
+            document.getElementById(newArray[i]).checked = true;
+          }
+          catch{
+            
+          }
+        }
+      }
+
+      catch {
+      }
+    </script>
+  
+
+
+  <div style="margin-bottom: 30px;">&nbsp;</div>
+  <div class="register">
+    <form action="/courses/{{ uid }}" method="POST">
+      <div class="input-group">
+        <input type="text" class="form-control" name="SearchButton">
+        <div class="input-group-append">
+          <button class="btn btn-primary" type="submit">Search</button>
         </div>
-      </form>
-    </div>
+        <div class="checkbox">
+          <label for="Professor"><input type="checkbox" name="Professor" style="width: 30px">by Professor</label>
+          <label for="Title"><input type="checkbox" name="Title" style="width: 30px">by Title</label>
+          <label for="Credits" style="margin-right: 40px"><input type="checkbox" name="Credits" style="width: 30px">by Credits </label>
+        </div>
+      </div>
+    </form>
+  </div>
+  
 {% endblock %}
