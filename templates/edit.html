@@ -17,6 +17,10 @@
 
             {{ wtf.form_field(form.name, style="font-size: 20px") }}
             {{ wtf.form_field(form.email, style="font-size: 20px") }}
+            {% if newUser != "True" %}
+              {{ wtf.form_field(form.phone, style="font-size: 20px") }}
+              {{ wtf.form_field(form.verificationType, style="display: flex; justify-content: flex-start;")}} 
+            {% endif %}
             {{ wtf.form_field(form.dob, style="font-size: 20px") }}
             {% if userType == "Student" %}
               {{ wtf.form_field(form.gradYear, style="font-size: 20px") }}
@@ -27,9 +31,7 @@
             </form>
         </div>
     </body>
-    {% if newUser == "True" %}
-
-    {% else %}
+    {% if newUser != "True" %}
       <div class="container">
         <p style="margin: 10px 10px 10px 10px">Wish to change your password?
         <a href="{{ url_for('passedit', uid=uid) }}">Click here</a></p>
