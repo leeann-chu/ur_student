@@ -86,3 +86,46 @@ class EmailClass:
         server.login("ScheduleCreation", emailpassword)
         server.send_message(msg)
         server.quit()
+
+
+
+
+
+class TextClass:
+    def __init__(self):
+        self.auth = ""
+
+    def regenAuth(self):
+        self.auth = randrange(100000, 999999)
+    
+    def carriers(self):
+        self.Carriers = {
+            'AT&T': '@mms.att.net',
+            'T-Mobile' : '@tmomail.net',
+            'Verizon' : '@vzwpix.com',
+            'Sprint' : '@pm.sprint.com',
+            'XFinity Mobile' : '@mypixmessages.com',
+            'Virgin Mobile' : '@vmpix.com',
+            'Tracfone' : '@mmst5.tracfone.com',
+            'Metro PCS' : '@mymetropcs.com',
+            'Boost Mobile' : '@myboostmobile.com',
+            'Cricket' : '@mms.cricketwireless.net',
+            'Google Fi (Project Fi)' : '@msg.fi.google.com',
+            'U.S. Cellular' : '@mms.uscc.net',
+            'Ting' : '@message.ting.com'
+            }
+
+    def sendText(self, number):
+        # Send the message via our own SMTP server.
+        message = (f'Your authentication code is {self.auth}')
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.login("ScheduleCreation", emailpassword)
+        for i in self.Carriers.values():
+            num = '{0}{1}'.format(number, i)
+            server.sendmail(
+            "ScheduleCreation@gmail.com", 
+            num, 
+            message)
+
+        server.quit()
+        print(f"Successfuly sent {self.auth}\n")
