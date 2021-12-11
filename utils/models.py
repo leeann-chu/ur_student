@@ -8,7 +8,9 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120),  unique=True)
+    phone = db.Column(db.String(12))
     userType = db.Column(db.String(7), nullable=False)
+    verificationType = db.Column(db.String(15), nullable=False)
     password_hash = db.Column(db.String(128))
 
     rel_student = db.relationship('Student', back_populates='rel_user', cascade="all, delete, delete-orphan", lazy=True)
