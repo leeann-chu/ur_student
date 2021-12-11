@@ -17,9 +17,12 @@ class RegistrationForm(FlaskForm):
     username = StringField('Username', [DataRequired()])
     email = StringField('Email', [DataRequired(), Email(message=('That\'s not a valid email address.')),
         Length(min=5, max=40)])
+    phone = StringField('Phone Number', [Optional()])
     password = PasswordField('Password', [DataRequired()])
     password2 = PasswordField('Repeat Password', [DataRequired(), EqualTo('password')])
     userType = RadioField("What are you?", choices=[('Student'), ('Teacher')],
+                          validators=[DataRequired()])
+    verificationType = RadioField("User Verification Type", choices=[('Verify by email'), ('Verify by text')],
                           validators=[DataRequired()])
     submit = SubmitField('Register')
 
@@ -39,7 +42,9 @@ class EditForm(FlaskForm):
     email = StringField('Email',
         [Email(message=('That\'s not a valid email address.')),
         Length(min=5, max=40)])
-
+    phone = StringField('Phone Number', validators=[Optional()])
+    verificationType = RadioField("User Verification Type", choices=[('Verify by email'), ('Verify by text')],
+                            validators=[Optional()])
     gradYear = SelectField('Gradutation Year', choices=[x for x in range(2000, 2030)], validators=[Optional()])
     pfp = StringField('Enter a link to your profile picture (For best results we recommend roughly 400x400)')
 
