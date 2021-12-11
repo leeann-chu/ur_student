@@ -6,7 +6,7 @@ from utils.models import User, Student, Courses
 from main import db, app
 from random import randrange, choice
 from datetime import datetime
-from utils.emails import EmailClass
+from utils.emails import EmailClass, TextClass
 
 @app.route('/')
 @app.route('/index')
@@ -15,6 +15,7 @@ def index():
     return render_template('index.html', title='Home', color='blue', info="Home Page")
 
 email = EmailClass()
+phone = TextClass()
 slotTimes = {
     9:  '1',
     10: '2',
@@ -25,6 +26,7 @@ slotTimes = {
     6:  '7',
     7:  '8'
 }
+
 @app.route("/login", methods=['GET', 'POST'])
 def login(): #*
     if current_user.is_authenticated:
@@ -38,10 +40,18 @@ def login(): #*
         if user is None or not user.check_password(loginForm.password.data):
             flash('Invalid username or password', "alert-error")
             return redirect(url_for('login'))
+        
+        if user.verificationType == 'Verify by text' and user.phone != '':
+            phone.regenAuth()
+            phone.carriers()
+            phone.sendText(user.phone)
+            flash('Please check your text for your authentication code', "alert-success")
+        
+        else:
+            email.regenAuth()
+            email.sendEmail(email.createVerifMsg(user.email))
+            flash('Please check your email for your authentication code', "alert-success")
 
-        email.regenAuth()
-        email.sendEmail(email.createVerifMsg(user.email))
-        flash('Please check your email for your authentication code', "alert-success")
         return redirect(url_for('validate', uid=user.id))
 
     return render_template('login.html', title='Sign In', form=loginForm, color='blue', info='URStudent') ##
@@ -50,8 +60,15 @@ def login(): #*
 def validate(uid): #*
     user = User.query.filter_by(id=uid).first()
     form = TwoFactorForm()
+    if user.verificationType == 'Verify by text' and user.phone != '':
+        verify = phone.auth
+    elif user.verificationType == 'Verify by text' and user.phone == '':
+        verify = email.auth
+        flash("Phone number was left blank, sending verification code to your email", "alert-error")
+    else:
+        verify = email.auth
     if form.validate_on_submit():
-        if str(email.auth) == form.verification.data:
+        if str(verify) == form.verification.data:
             login_user(user)
             return redirect(url_for('index'))
         else:
@@ -97,6 +114,8 @@ def edit(uid, newUser): #*
             if student.rel_user.userType == "Student":
                 form.gradYear.data = student.gradYear
             form.pfp.data = student.pfp
+            form.verificationType.data = student.rel_user.verificationType
+            form.phone.data = student.rel_user.phone
 
     if form.validate_on_submit():
         student.fullName = form.name.data
@@ -104,7 +123,11 @@ def edit(uid, newUser): #*
         student.gradYear = form.gradYear.data
         student.pfp = form.pfp.data
         student.rel_user.email = form.email.data
+        if newUser != "True":
+            student.rel_user.phone = form.phone.data
+            student.rel_user.verificationType = form.verificationType.data
         db.session.commit()
+
         if newUser == "True":
             return redirect(url_for("index"))
         return redirect(url_for("profile", uid=uid, edit=True))
@@ -157,7 +180,7 @@ def passreset(edit, email): #*
 def courses(uid): #*
     student = Student.query.filter_by(userID=uid).first()
     Decision = 0    # Ensures only one operation happens (course deleted, course(s) registered, or search submitted. Cannot have multiple)
-    
+
     try:    # Deletes course
         Course_ID = int(request.form['Delete'])
         course = Courses.query.filter_by(courseID=Course_ID).first()
@@ -316,7 +339,6 @@ def schedule(uid): #*
 @app.route("/schedule/vcourse.html/<int:cid>")
 def vcourse(cid):
     course = Courses.query.filter_by(courseID=cid).first()
-    print(course)
     return render_template('vcourse.html', cid=cid, Course=course, title=course.numTitle, color='green', info=course.numTitle)
 
 @app.route('/logout')
@@ -330,7 +352,7 @@ def register(): #*
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data, userType=form.userType.data)
+        user = User(username=form.username.data, email=form.email.data, phone=form.phone.data, userType=form.userType.data, verificationType=form.verificationType.data)
         user.set_password(form.password.data)
         db.session.add(user)
         studentID = randrange(11111, 99999)
