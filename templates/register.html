@@ -9,10 +9,18 @@
         {{ wtf.form_errors(form, hiddens="only") }}
         {{ wtf.form_field(form.username, style="font-size: 20px; width: 60%") }}
         {{ wtf.form_field(form.email, style="font-size: 20px; width: 80%") }}
+        {{ wtf.form_field(form.phone, style="font-size: 20px; width: 80%") }}
         {{ wtf.form_field(form.password, style="font-size: 20px; width: 60%") }}
         {{ wtf.form_field(form.password2, style="font-size: 20px; width: 60%") }}
-
-        {{ wtf.form_field(form.userType, style="display: flex; justify-content: flex-start;")}}
+        <div class="row">
+            <div class="col">
+                {{ wtf.form_field(form.userType, style="display: flex; justify-content: flex-start;")}}
+            </div>
+            <div class="col" id='testing'>
+                {{ wtf.form_field(form.verificationType, style="display: flex; justify-content: flex-start;")}} 
+            </div>
+        </div>
+        
         <button class="btn btn-primary" type="submit">Register</button>
     </form>
 {% endblock %}
